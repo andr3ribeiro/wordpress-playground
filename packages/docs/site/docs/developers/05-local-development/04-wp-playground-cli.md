@@ -6,7 +6,7 @@ description: A command-line tool for WordPress development and testing with quic
 
 # Playground CLI
 
-[@wp-playground/cli](https://www.npmjs.com/package/@wp-playground/cli) is a command-line tool that simplifies the WordPress development and testing flow. You can use Playground CLI to auto-mount a directory with a plugin, theme, or WordPress installation. If you need flexibility, you can use mounting commands to personalize your local environment.
+[@wp-playground/cli](https://www.npmjs.com/package/@wp-playground/cli) is a command-line tool that simplifies the WordPress development and testing flow. You can use Playground CLI to simplify the development workflow for themes and plugins. The Playground CLI also includes a set of flags to personalize the developer environment to attend the developers needs.
 
 **Key features:**
 
@@ -115,10 +115,9 @@ Sometimes you're working with a complex project structure where directories are 
     └── plugins
         ├── hello-dolly/                # regular directory
         └── secret-plugin → /home/www/plugins/secret-plugin
-```  
+```
 
 By default, Playground CLI only accesses the directories you explicitly mount and won't any load files from `/home/www/plugins/secret-plugin`. You can, however, explicitly instruct Playground CLI to follow that, and other, symlinks with the `--follow-symlink` option:
-     
 
 ```bash
 npx @wp-playground/cli@latest server \
