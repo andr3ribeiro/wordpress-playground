@@ -492,54 +492,6 @@ const cliServer = await runCLI({
 });
 ```
 
-### Mode selection (Blueprint v2)
-
-You can specify different modes when working with Blueprint v2:
-
-**Creating a new site:**
-
-```TypeScript
-import { runCLI } from "@wp-playground/cli";
-
-const cliServer = await runCLI({
-  command: 'server',
-  'experimental-blueprints-v2-runner': true,
-  mode: 'create-new-site',
-  'mount-before-install': [
-    {
-      hostPath: './my-new-site',
-      vfsPath: '/wordpress'
-    }
-  ]
-});
-```
-
-**Applying to an existing site:**
-
-```TypeScript
-const cliServer = await runCLI({
-  command: 'server',
-  'experimental-blueprints-v2-runner': true,
-  mode: 'apply-to-existing-site',
-  'mount-before-install': [
-    {
-      hostPath: './existing-wordpress',
-      vfsPath: '/wordpress'
-    }
-  ],
-  blueprint: {
-    steps: [
-      {
-        step: 'setSiteOptions',
-        options: {
-          blogname: 'Updated Site Name'
-        }
-      }
-    ]
-  }
-});
-```
-
 ## Automated testing
 
 ### Integration testing with Vitest
@@ -617,50 +569,13 @@ describe('My Plugin Tests', () => {
 });
 ```
 
-### Testing theme customizations
-
-```TypeScript
-test('theme displays custom header', async () => {
-  cliServer = await runCLI({
-    command: 'server',
-    mount: [
-      {
-        hostPath: './my-theme',
-        vfsPath: '/wordpress/wp-content/themes/my-theme'
-      }
-    ],
-    blueprint: {
-      steps: [
-        {
-          step: 'installTheme',
-          themeData: {
-            resource: 'vfs',
-            path: '/wordpress/wp-content/themes/my-theme'
-          }
-        },
-        {
-          step: 'activateTheme',
-          themeFolderName: 'my-theme'
-        }
-      ]
-    }
-  });
-
-  const homeUrl = new URL('/', cliServer.serverUrl);
-  const response = await fetch(homeUrl);
-  const html = await response.text();
-
-  expect(html).toContain('<header class="site-header">');
-});
-```
-
 ### Testing a plugin with different WordPress/PHP versions
 
 ```TypeScript
 test('plugin works with WordPress 6.4 and PHP 8.0', async () => {
   cliServer = await runCLI({
     command: 'server',
-    php: '8.0',
+    php: '8.3',
     wp: '6.4',
     mount: [
       {
