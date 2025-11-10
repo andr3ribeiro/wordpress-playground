@@ -6,7 +6,7 @@ description: A command-line tool for WordPress development and testing with quic
 
 # Playground CLI
 
-[@wp-playground/cli](https://www.npmjs.com/package/@wp-playground/cli) is a command-line tool that simplifies the WordPress development and testing flow. You can use Playground CLI to simplify the development workflow for themes and plugins. The Playground CLI also includes a set of flags to personalize the developer environment to attend the developers needs.
+[@wp-playground/cli](https://www.npmjs.com/package/@wp-playground/cli) is a command-line tool that simplifies the WordPress development and testing flow. The Playground CLI also includes a set of flags to personalize the developer environment to meet developers' needs.
 
 **Key features:**
 
@@ -37,7 +37,7 @@ cd my-plugin
 npx @wp-playground/cli@latest server --auto-mount
 ```
 
-### Choosing a WordPress and PHP version
+### Choose a WordPress and PHP version
 
 By default, the CLI loads PHP 8.3 and the latest stable version of WordPress. You can specify different versions using the `--wp=<version>` and `--php=<version>` flags. This is particularly useful when you need to test your plugin or theme for compatibility across different WordPress and PHP versions, ensuring your code works correctly for users running older installations.
 
@@ -47,7 +47,7 @@ npx @wp-playground/cli@latest server --wp=6.4 --php=8.0
 
 ### Setting a custom site URL
 
-You can configure a custom site URL for your development environment, which is useful for testing domain-specific functionality or simulating production environments:
+Configure a custom site URL for your development environment, which is useful for testing domain-specific functionality or simulating production environments:
 
 ```bash
 npx @wp-playground/cli@latest server --site-url=https://my-local-dev.test
@@ -55,9 +55,9 @@ npx @wp-playground/cli@latest server --site-url=https://my-local-dev.test
 
 ### Loading blueprints
 
-One way to take your Playground CLI development experience to the next level is to integrate with [Blueprints](/blueprints/getting-started/). For those unfamiliar with this technology, it allows developers to configure the initial state for their WordPress Playground instances.
+[Blueprints](/blueprints/getting-started/) configure your Playground instance's initial state. They install plugins, set options, and define landing pages.
 
-Using the `--blueprint=<blueprint-address>` flag, developers can run a Playground with a custom initial state. We'll use the example below to do this.
+Using the `--blueprint=<blueprint-address>` flag, Playground can run with a custom initial state. We'll use the example below to do this.
 
 **(my-blueprint.json)**
 
@@ -82,6 +82,10 @@ Some projects have a specific structure that requires a custom configuration; fo
 ```bash
 npx @wp-playground/cli@latest server --mount-dir=. /wordpress/wp-content/plugins/MY-PLUGIN-DIRECTORY
 ```
+
+:::info
+On Windows, the path format used by `--mount`, for example, `/host/path:/vfs/path`, can cause issues. To resolve this, use the flags `--mount-dir` and `--mount-dir-before-install`. These flags let you specify host and virtual file system paths in an alternative format: `"/host/path"` `"/vfs/path"`.
+:::
 
 **Multiple mounts:**
 
@@ -113,7 +117,7 @@ Sometimes you're working with a complex project structure where directories are 
         └── secret-plugin → /home/www/plugins/secret-plugin
 ```
 
-By default, Playground CLI only accesses the directories you explicitly mount and won't any load files from `/home/www/plugins/secret-plugin`. You can, however, explicitly instruct Playground CLI to follow that, and other, symlinks with the `--follow-symlink` option:
+By default, Playground CLI only accesses the directories you explicitly mount and won't load any files from `/home/www/plugins/secret-plugin`. You can, however, explicitly instruct Playground CLI to follow that, and other, symlinks with the `--follow-symlink` option:
 
 ```bash
 npx @wp-playground/cli@latest server \
@@ -241,11 +245,8 @@ The `server` command supports the following optional arguments:
 -   `--internal-cookie-store`: Enable internal cookie handling. When enabled, Playground will manage cookies internally using an HttpCookieStore that persists cookies across requests. When disabled, cookies are handled externally (e.g., by a browser in Node.js environments). Defaults to false.
 -   `--xdebug`: Enable Xdebug. Defaults to false.
 -   `--experimental-devtools`: Enable experimental browser development tools. Defaults to false.
+-   `--experimental-unsafe-ide-integration=<ide>`: Set up the Xdebug integration on VS Code(`vscode`) and PhpStorm(`phpstorm`).
 -   `--experimental-multi-worker=<number>`: Enable experimental multi-worker support which requires a `/wordpress` directory backed by a real file system. Pass a positive number to specify the number of workers to use. Otherwise, defaults to the number of CPUs minus one.
-
-:::info
-On Windows, the path format used by `--mount`, for example, `/host/path:/vfs/path`, can cause issues. To resolve this, use the flags `--mount-dir` and `--mount-dir-before-install`. These flags let you specify host and virtual file system paths in an alternative format: `"/host/path"` `"/vfs/path"`.
-:::
 
 ## Need some help with the CLI?
 
@@ -264,62 +265,38 @@ The Playground CLI can also be controlled programmatically from your JavaScript/
 Using the `runCLI` function, you can specify options like the PHP and WordPress versions. In the example below, we request PHP 8.3, the latest version of WordPress, and to be automatically logged in. All supported arguments are defined in the `RunCLIArgs` type.
 
 ```TypeScript
-import { runCLI, RunCLIArgs, RunCLIServer } from "@wp-playground/cli";
+import { runCLI, RunCLIArgs} from "@wp-playground/cli";
 
-let cliServer: RunCLIServer;
-
-cliServer = await runCLI({
-    command: 'server',
-    php: '8.3',
-    wp: 'latest',
-    login: true
+const cliServer = await runCLI({
+  command: 'server',
+  php: '8.3',
+  wp: 'latest',
+  login: true,
 } as RunCLIArgs);
 ```
 
 To execute the code above, you can set your preferred method. A simple way to execute this code is to save it as a `.ts` file and run it with a tool like `tsx`. For example: `tsx my-script.ts`
 
-**Testing with specific PHP versions:**
+### Setting a custom site URL programmatically
 
 ```TypeScript
 import { runCLI } from "@wp-playground/cli";
 
 const cliServer = await runCLI({
-  command: 'server',
-  php: '8.3',
-  skipWordPressSetup: true,
-  skipSqliteSetup: true,
-});
+    command: 'server',
+    'site-url': 'https://my-staging.example.com',
+    port: 9500
+  });
 
-// Test PHP version
-await cliServer.playground.writeFile(
-  '/wordpress/version.php',
-  '<?php echo phpversion(); ?>'
-);
+  // Verify site URL is set correctly
+  await cliServer.playground.writeFile(
+    '/wordpress/check-url.php',
+    '<?php require_once "/wordpress/wp-load.php"; echo get_option("siteurl"); ?>'
+  );
 
-const versionUrl = new URL('/version.php', cliServer.serverUrl);
-const response = await fetch(versionUrl);
-const version = await response.text();
-console.log('PHP Version:', version); // Outputs: 8.0.x
-```
-
-### Setting a custom site URL programmatically
-
-```TypeScript
-const cliServer = await runCLI({
-  command: 'server',
-  'site-url': 'https://my-staging.example.com',
-  port: 9500
-});
-
-// Verify site URL is set correctly
-await cliServer.playground.writeFile(
-  '/wordpress/check-url.php',
-  '<?php require_once "/wordpress/wp-load.php"; echo get_option("siteurl"); ?>'
-);
-
-const checkUrl = new URL('/check-url.php', cliServer.serverUrl);
-const response = await fetch(checkUrl);
-console.log('Site URL:', await response.text());
+  const checkUrl = new URL('/check-url.php', cliServer.serverUrl);
+  const response = await fetch(checkUrl);
+  console.log('Site URL:', await response.text());
 ```
 
 ### Controlling verbosity programmatically
@@ -715,22 +692,25 @@ test('plugin works with WordPress 6.4 and PHP 8.0', async () => {
 When you only need to test PHP code without WordPress, you can skip the setup for faster testing:
 
 ```TypeScript
+import { runCLI } from "@wp-playground/cli";
+
 const cliServer = await runCLI({
-  command: 'server',
-  skipWordPressSetup: true,
-  skipSqliteSetup: true,
-  php: '8.3'
+    command: 'server',
+    php: '8.3',
+    wordpressInstallMode: 'do-not-attempt-installing',
+    skipSqliteSetup: true,
 });
 
-// Write and test custom PHP scripts
+// Test PHP version
 await cliServer.playground.writeFile(
-  '/wordpress/test.php',
-  '<?php echo "Hello from PHP!"; ?>'
+  '/wordpress/version.php',
+  '<?php echo phpversion(); ?>'
 );
 
-const testUrl = new URL('/test.php', cliServer.serverUrl);
-const response = await fetch(testUrl);
-console.log(await response.text()); // Outputs: Hello from PHP!
+const versionUrl = new URL('/version.php', cliServer.serverUrl);
+const response = await fetch(versionUrl);
+const version = await response.text();
+console.log('PHP Version:', version); // Outputs: 8.3.x
 ```
 
 ### Error handling
