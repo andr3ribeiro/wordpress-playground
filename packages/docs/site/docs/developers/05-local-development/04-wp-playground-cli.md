@@ -77,10 +77,10 @@ npx @wp-playground/cli@latest server --blueprint=my-blueprint.json
 
 ### Mounting folders manually
 
-Some projects have a specific structure that requires a custom configuration; for example, your repository contains all the files in the `/wp-content/` folder. So in this scenario, you can specify to the Playground CLI that it will mount your project from that folder using the `--mount` flag.
+Some projects have a specific structure that requires a custom configuration; for example, your repository contains all the files in the `/wp-content/` folder. So in this scenario, you can specify to the Playground CLI that it will mount your project from that folder using the `--mount-dir` flag.
 
 ```bash
-npx @wp-playground/cli@latest server --mount=.:/wordpress/wp-content/plugins/MY-PLUGIN-DIRECTORY
+npx @wp-playground/cli@latest server --mount-dir=. /wordpress/wp-content/plugins/MY-PLUGIN-DIRECTORY
 ```
 
 **Multiple mounts:**
@@ -89,21 +89,17 @@ You can mount multiple directories at once:
 
 ```bash
 npx @wp-playground/cli@latest server \
-  --mount=./my-plugin:/wordpress/wp-content/plugins/my-plugin \
-  --mount=./my-theme:/wordpress/wp-content/themes/my-theme
+  --mount-dir=./my-plugin /wordpress/wp-content/plugins/my-plugin \
+  --mount-dir=./my-theme /wordpress/wp-content/themes/my-theme
 ```
 
 ### Mounting before WordPress installation
 
-Consider mounting your WordPress project files before the WordPress installation begins. This approach is beneficial if you want to override the Playground boot process, as it can help connect Playground with `WP-CLI`. The `--mount-before-install` flag supports this process.
+Consider mounting your WordPress project files before the WordPress installation begins. This approach is beneficial if you want to override the Playground boot process, as it can help connect Playground with `WP-CLI`. The `--mount-dir-before-install` flag supports this process.
 
 ```bash
-npx @wp-playground/cli@latest server --mount-before-install=.:/wordpress/
+npx @wp-playground/cli@latest server --mount-dir-before-install=. /wordpress/
 ```
-
-:::info
-On Windows, the path format `/host/path:/vfs/path` can cause issues. To resolve this, use the flags `--mount-dir` and `--mount-dir-before-install`. These flags let you specify host and virtual file system paths in an alternative format: `"/host/path"` `"/vfs/path"`.
-:::
 
 ### Symlink support for monorepos
 
@@ -122,7 +118,7 @@ By default, Playground CLI only accesses the directories you explicitly mount an
 ```bash
 npx @wp-playground/cli@latest server \
   --follow-symlinks \
-  --mount-before-install=./packages/my-plugin:/wordpress/wp-content/plugins/my-plugin
+  --mount-dir-before-install=./packages/my-plugin /wordpress/wp-content/plugins/my-plugin
 ```
 
 :::caution
@@ -195,7 +191,7 @@ Playground CLI automatically removes temp directories that are:
 ```bash
 # Mount your entire wp-content directory
 cd my-wordpress-project
-npx @wp-playground/cli@latest server --mount=./wp-content:/wordpress/wp-content
+npx @wp-playground/cli@latest server --mount-dir=./wp-content /wordpress/wp-content
 ```
 
 ## Verbosity and debugging
@@ -248,7 +244,7 @@ The `server` command supports the following optional arguments:
 -   `--experimental-multi-worker=<number>`: Enable experimental multi-worker support which requires a `/wordpress` directory backed by a real file system. Pass a positive number to specify the number of workers to use. Otherwise, defaults to the number of CPUs minus one.
 
 :::info
-On Windows, the path format `/host/path:/vfs/path` can cause issues. To resolve this, use the flags `--mount-dir` and `--mount-dir-before-install`. These flags let you specify host and virtual file system paths in an alternative format`"/host/path"` `"/vfs/path"`.
+On Windows, the path format used by `--mount`, for example, `/host/path:/vfs/path`, can cause issues. To resolve this, use the flags `--mount-dir` and `--mount-dir-before-install`. These flags let you specify host and virtual file system paths in an alternative format: `"/host/path"` `"/vfs/path"`.
 :::
 
 ## Need some help with the CLI?
@@ -289,7 +285,7 @@ import { runCLI } from "@wp-playground/cli";
 
 const cliServer = await runCLI({
   command: 'server',
-  php: '8.0',
+  php: '8.3',
   skipWordPressSetup: true,
   skipSqliteSetup: true,
 });
