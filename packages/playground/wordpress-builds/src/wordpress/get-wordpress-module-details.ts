@@ -28,14 +28,14 @@ export function getWordPressModuleDetails(wpVersion: string = "6.8"): { size: nu
 		case 'nightly':
 			/** @ts-ignore */
 			return {
-				size: 24860681,
+				size: 24759103,
 				url: url_nightly,
 			};
 			
 		case 'beta':
 			/** @ts-ignore */
 			return {
-				size: 24858911,
+				size: 24759083,
 				url: url_beta,
 			};
 			
