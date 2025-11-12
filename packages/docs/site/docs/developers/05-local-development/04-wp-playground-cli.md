@@ -84,7 +84,7 @@ npx @wp-playground/cli@latest server --mount-dir . /wordpress/wp-content/plugins
 ```
 
 :::info
-On Windows, the path format used by `--mount`, for example, `/host/path:/vfs/path`, can cause issues. To resolve this, use the flags `--mount-dir` and `--mount-dir-before-install`. These flags let you specify host and virtual file system paths in an alternative format: `"/host/path"` `"/vfs/path"`.
+On Windows, the path format used by `--mount`, for example, `/host/path:/vfs/path`, can clash with the system path format, e.g. to the machine, it's unclear which `:` separates the paths in `--mount=C:\plugin:/wordpress/wp-content/plugin`. To resolve this, use `--mount-dir` and `--mount-dir-before-install` instead. These flags let you specify host and virtual file system paths in a space-separated format: `--mount-dir "/host/path"` `"/vfs/path"`.
 :::
 
 **Multiple mounts:**
