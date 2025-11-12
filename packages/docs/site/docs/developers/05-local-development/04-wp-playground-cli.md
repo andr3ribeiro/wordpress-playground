@@ -80,7 +80,7 @@ npx @wp-playground/cli@latest server --blueprint=my-blueprint.json
 Some projects have a specific structure that requires a custom configuration; for example, your repository contains all the files in the `/wp-content/` folder. So in this scenario, you can specify to the Playground CLI that it will mount your project from that folder using the `--mount-dir` flag.
 
 ```bash
-npx @wp-playground/cli@latest server --mount-dir=. /wordpress/wp-content/plugins/MY-PLUGIN-DIRECTORY
+npx @wp-playground/cli@latest server --mount-dir . /wordpress/wp-content/plugins/MY-PLUGIN-DIRECTORY
 ```
 
 :::info
