@@ -47,7 +47,7 @@ npx @wp-playground/cli@latest server --wp=6.4 --php=8.0
 
 ### Setting a custom site URL
 
-Configure a custom site URL for your development environment, which is useful for testing domain-specific functionality or simulating production environments:
+Configure a custom site URL for your local development environment, which is useful for testing domain-specific functionality or simulating production environments:
 
 ```bash
 npx @wp-playground/cli@latest server --site-url=https://my-local-dev.test
@@ -93,17 +93,32 @@ You can mount multiple directories at once:
 
 ```bash
 npx @wp-playground/cli@latest server \
-  --mount-dir=./my-plugin /wordpress/wp-content/plugins/my-plugin \
-  --mount-dir=./my-theme /wordpress/wp-content/themes/my-theme
+  --mount-dir ./my-plugin /wordpress/wp-content/plugins/my-plugin \
+  --mount-dir ./my-theme /wordpress/wp-content/themes/my-theme
 ```
 
 ### Mounting before WordPress installation
 
-Consider mounting your WordPress project files before the WordPress installation begins. This approach is beneficial if you want to override the Playground boot process, as it can help connect Playground with `WP-CLI`. The `--mount-dir-before-install` flag supports this process.
+When you have a local WordPress site, you can run it in Playground CLI as well. Here's one way to do it:
 
 ```bash
-npx @wp-playground/cli@latest server --mount-dir-before-install=. /wordpress/
+npx @wp-playground/cli@latest server \
+     --mount-dir-before-install ./wordpress-path-on-host /wordpress/ \
+     --wordpress-install-mode=do-not-attempt-installing
 ```
+
+To unpack it, that command mounted the entire WordPress site you already had on your disk using the `--mount-dir-before-install` flag. That mount happened before Playground had a chance to download another WordPress version and unzip it in `/wordpress`. Then, we've told Playground CLI to skip running the WordPress installer. That site was already installed, so why would we?
+
+With this workflow, you can store your WordPress site directly in the filesystem, retain it across multiple Playground CLI executions, and use the usual WordPress tools with it, e.g. `WP-CLI`.
+
+You can also use the `--mount-dir-before-install` flag to populate a local directory with a newly created WordPress site:
+
+```bash
+npx @wp-playground/cli@latest server \
+     --mount-dir-before-install ./wordpress-path-on-host /wordpress/
+```
+
+Since we did not skip the installer, Playground CLI runs the site setup as usual, only this time the `/wordpress` directory is connected to your local directory. At the end of the command, the new site files are stored in `./wordpress-path-on-host` in your local filesystem! To run that site again, use the `--wordpress-install-mode` flag discussed above.
 
 ### Symlink support for monorepos
 
@@ -122,11 +137,11 @@ By default, Playground CLI only accesses the directories you explicitly mount an
 ```bash
 npx @wp-playground/cli@latest server \
   --follow-symlinks \
-  --mount-dir-before-install=./packages/my-plugin /wordpress/wp-content/plugins/my-plugin
+  --mount-dir-before-install ./packages/my-plugin /wordpress/wp-content/plugins/my-plugin
 ```
 
 :::caution
-Using `--follow-symlinks` can expose files outside mounted directories to Playground and could be a security risk. Only use this flag when you trust the symlink targets.
+Using `--follow-symlinks` can expose files outside mounted directories to Playground and could be a security risk. Avoid using this flag with untrusted code or when mounting directories you didn't create yourself.
 :::
 
 ### Understanding data persistence and SQLite location
@@ -280,7 +295,6 @@ Run the code above using your preferred TypeScript runtime, e.g. `tsx`:
 ```sh
 npx tsx my-script.ts
 ```
-
 
 ### Setting a custom site URL programmatically
 
