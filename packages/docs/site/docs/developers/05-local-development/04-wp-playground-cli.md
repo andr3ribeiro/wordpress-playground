@@ -275,7 +275,12 @@ const cliServer = await runCLI({
 } as RunCLIArgs);
 ```
 
-To execute the code above, you can set your preferred method. A simple way to execute this code is to save it as a `.ts` file and run it with a tool like `tsx`. For example: `tsx my-script.ts` if you have the package installed on your project or `npx tsx my-script.ts` to use it once without installing the package.
+Run the code above using your preferred TypeScript runtime, e.g. `tsx`:
+
+```sh
+npx tsx my-script.ts
+```
+
 
 ### Setting a custom site URL programmatically
 
