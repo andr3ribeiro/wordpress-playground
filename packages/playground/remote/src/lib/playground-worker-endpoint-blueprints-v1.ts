@@ -67,11 +67,15 @@ class PlaygroundWorkerEndpointBlueprintsV1 extends PlaygroundWorkerEndpoint {
 				phpVersion: phpVersion!,
 			});
 
-			this.requestedWordPressVersion = wpVersion;
-			wpVersion = MinifiedWordPressVersionsList.includes(wpVersion)
-				? wpVersion
+			this.requestedWordPressVersion =
+				wpVersion === 'nightly' ? 'trunk' : wpVersion;
+			wpVersion = MinifiedWordPressVersionsList.includes(
+				this.requestedWordPressVersion
+			)
+				? this.requestedWordPressVersion
 				: LatestMinifiedWordPressVersion;
 
+			const wpDetails = getWordPressModuleDetails(wpVersion);
 			let wordPressRequest: Promise<Response> | null = null;
 			if (shouldInstallWordPress) {
 				if (this.requestedWordPressVersion!.startsWith('http')) {
@@ -105,12 +109,15 @@ class PlaygroundWorkerEndpointBlueprintsV1 extends PlaygroundWorkerEndpoint {
 							);
 						});
 				} else {
-					const wpDetails = getWordPressModuleDetails(wpVersion);
+					const downloadUrl = maybeProxyUrl(
+						wpDetails.url,
+						corsProxyUrl as string | undefined
+					);
 					this.downloadMonitor.expectAssets({
-						[wpDetails.url]: wpDetails.size,
+						[downloadUrl]: wpDetails.size,
 					});
 					wordPressRequest = this.downloadMonitor.monitorFetch(
-						fetch(wpDetails.url)
+						fetch(downloadUrl)
 					);
 				}
 			}
@@ -192,3 +199,13 @@ class PlaygroundWorkerEndpointBlueprintsV1 extends PlaygroundWorkerEndpoint {
 const [setApiReady, setAPIError] = exposeAPI(
 	new PlaygroundWorkerEndpointBlueprintsV1(downloadMonitor)
 );
+
+function maybeProxyUrl(url: string, corsProxyUrl?: string) {
+	if (
+		!corsProxyUrl ||
+		!url.startsWith('https://github.com/WordPress/WordPress/archive/')
+	) {
+		return url;
+	}
+	return `${corsProxyUrl}${url}`;
+}
