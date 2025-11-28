@@ -41,6 +41,7 @@ import {
 } from '@wp-playground/blueprints';
 import { lazy, Suspense, useState, useEffect, useCallback } from 'react';
 import { logger } from '@php-wasm/logger';
+import { encodeStringAsBase64 } from '../../../lib/base64';
 
 const SiteFileBrowser = lazy(() =>
 	import('../site-file-browser').then((m) => ({ default: m.SiteFileBrowser }))
@@ -186,6 +187,24 @@ export function SiteInfoPanel({
 
 		return () => clearTimeout(timeoutId);
 	}, [blueprintCode, autoRecreate, isTemporary, handleRecreateFromBlueprint]);
+
+	// Update URL hash when blueprint changes for shareable URLs
+	useEffect(() => {
+		if (!isTemporary || !blueprintCode) {
+			return;
+		}
+
+		try {
+			// Validate that it's valid JSON before updating the URL
+			JSON.parse(blueprintCode);
+			const encodedBlueprint = encodeStringAsBase64(blueprintCode);
+			const newUrl = new URL(window.location.href);
+			newUrl.hash = encodedBlueprint;
+			window.history.replaceState(null, '', newUrl.toString());
+		} catch {
+			// Don't update URL if blueprint is invalid JSON
+		}
+	}, [blueprintCode, isTemporary]);
 
 	const removeSiteAndCloseMenu = async (onClose: () => void) => {
 		// TODO: Replace with HTML-based dialog
